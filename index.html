@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>计算器</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: system-ui, sans-serif;
+}
+body {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #e6f2ff;
+  padding: 12px;
+}
+.calc {
+  width: 100%;
+  max-width: 420px;
+  background: #d6e8fa;
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 6px 20px #b8d4f0;
+}
+.display {
+  background: #f0f8ff;
+  padding: 16px;
+  border-radius: 12px;
+  text-align: right;
+  margin-bottom: 14px;
+  word-break: break-all;
+  min-height: 90px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.exp {
+  color: #4477aa;
+  font-size: 1.1rem;
+  min-height: 24px;
+}
+.result {
+  color: #225588;
+  font-size: 2.2rem;
+  font-weight: 500;
+}
+.btns {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+button {
+  border: none;
+  border-radius: 12px;
+  padding: 16px 0;
+  font-size: 1.3rem;
+  background: #b8d8f5;
+  color: #1a446b;
+  cursor: pointer;
+  transition: 0.15s;
+}
+button:active {
+  background: #8cbce8;
+  transform: scale(0.96);
+}
+.btn-op {
+  background: #73b3e7;
+  color: #fff;
+}
+.btn-clear {
+  background: #5a9ed6;
+  color: #fff;
+}
+.btn-del {
+  background: #68a8e0;
+  color: #fff;
+}
+.btn-equal {
+  background: #3488ce;
+  color: #fff;
+}
+@media (max-width: 360px) {
+  button {
+    padding: 14px 0;
+    font-size: 1.1rem;
+  }
+  .result {
+    font-size: 1.8rem;
+  }
+}
+</style>
+</head>
+<body>
+<div class="calc">
+  <div class="display">
+    <div class="exp" id="exp"></div>
+    <div class="result" id="result">0</div>
+  </div>
+  <div class="btns">
+    <button class="btn-clear" onclick="clearAll()">AC</button>
+    <button class="btn-del" onclick="backspace()">⌫</button>
+    <button class="btn-op" onclick="appendChar('/')">÷</button>
+    <button class="btn-op" onclick="appendChar('*')">×</button>
+
+    <button onclick="appendChar('7')">7</button>
+    <button onclick="appendChar('8')">8</button>
+    <button onclick="appendChar('9')">9</button>
+    <button class="btn-op" onclick="appendChar('-')">−</button>
+
+    <button onclick="appendChar('4')">4</button>
+    <button onclick="appendChar('5')">5</button>
+    <button onclick="appendChar('6')">6</button>
+    <button class="btn-op" onclick="appendChar('+')">+</button>
+
+    <button onclick="appendChar('1')">1</button>
+    <button onclick="appendChar('2')">2</button>
+    <button onclick="appendChar('3')">3</button>
+    <button class="btn-equal" style="grid-row: span 2;" onclick="calcEqual()">=</button>
+
+    <button onclick="appendChar('0')">0</button>
+    <button onclick="appendChar('.')">.</button>
+  </div>
+</div>
+<script>
+let expression = "";
+const expEl = document.getElementById("exp");
+const resEl = document.getElementById("result");
+
+function render() {
+  expEl.textContent = expression;
+}
+
+function appendChar(c) {
+  // 简单防连续运算符、连续小数点
+  const last = expression.slice(-1);
+  const ops = ["+", "-", "*", "/"];
+  if (ops.includes(c) && ops.includes(last)) return;
+  if (c === "." && last === ".") return;
+  expression += c;
+  render();
+}
+
+function clearAll() {
+  expression = "";
+  resEl.textContent = "0";
+  render();
+}
+
+function backspace() {
+  expression = expression.slice(0, -1);
+  render();
+  if (!expression) resEl.textContent = "0";
+}
+
+function calcEqual() {
+  if (!expression) return;
+  try {
+    // 安全计算 + 处理浮点数精度
+    const raw = expression.replace(/×/g, "*");
+    // 使用Number.toFixed修正精度，最多10位小数，自动去末尾0
+    let val = Function(`"use strict"; return (${raw})`)();
+    if (!isFinite(val)) throw new Error();
+    val = parseFloat(val.toFixed(10));
+    resEl.textContent = val;
+  } catch (e) {
+    resEl.textContent = "错误";
+  }
+}
+</script>
+</body>
+</html>
